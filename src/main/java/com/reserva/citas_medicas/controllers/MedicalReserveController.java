@@ -2,6 +2,9 @@ package com.reserva.citas_medicas.controllers;
 
 import java.util.List;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,8 +24,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PutMapping;
 
-
-
 @RestController
 @RequestMapping("/medical-reserves")
 public class MedicalReserveController {
@@ -32,17 +33,21 @@ public class MedicalReserveController {
 
   @GetMapping
   public ResponseEntity<List<MedicalReserveResponseDTO>> getAll(){
-    return ResponseEntity.ok(service.getAllReserves()); 
+    List<MedicalReserveResponseDTO> reserves = service.getAllReserves();
+
+    reserves.forEach(dto -> addLinks(dto));
+    return ResponseEntity.ok(reserves); 
   };
 
   @GetMapping("/{date}")
-  public ResponseEntity<?> BookAppointment(@PathVariable String date) {
+  public ResponseEntity<?> bookAppointment(@PathVariable String date) {
     List<MedicalReserveResponseDTO> availableReservation = service.getAvailableReservations(date);
 
     if(availableReservation.size() == 0){
       return ResponseEntity.ok("No hay reservas disponibles para la el dia " + date);
     }
 
+    availableReservation.forEach(this::addLinks);
     return ResponseEntity.ok(availableReservation);
   };
 
@@ -50,6 +55,8 @@ public class MedicalReserveController {
   public ResponseEntity<?> create(@Valid @RequestBody CreateMedicalReserveRequestDTO request){
     MedicalReserveResponseDTO reserveCreated = service.createReserve(request);
 
+
+    addLinks(reserveCreated);
     return ResponseEntity.ok(reserveCreated);
   };
 
@@ -62,6 +69,7 @@ public class MedicalReserveController {
         .body("No se encontro o no esta disponible la cita medica por el id: " + id);
     }
 
+    addLinks(reserveUpdate);
     return ResponseEntity.ok(reserveUpdate);
   };
 
@@ -85,5 +93,14 @@ public class MedicalReserveController {
     };
 
     return ResponseEntity.ok("Reserva eliminada");
+  };
+
+  void addLinks(MedicalReserveResponseDTO dto){
+    dto.add(linkTo(methodOn(MedicalReserveController.class).getAll()).withRel("medical-reserves"));
+    dto.add(linkTo(methodOn(MedicalReserveController.class).bookAppointment(dto.getDate())).withRel("medical-reserves-available"));
+    dto.add(linkTo(methodOn(MedicalReserveController.class).create(null)).withRel("create-reserve"));
+    dto.add(linkTo(methodOn(MedicalReserveController.class).update(dto.getId(), null)).withRel("book"));
+    dto.add(linkTo(methodOn(MedicalReserveController.class).cancel(dto.getId())).withRel("cancel"));
+    dto.add(linkTo(methodOn(MedicalReserveController.class).deleteMedicalReserve(dto.getId())).withRel("delete"));
   };
 };

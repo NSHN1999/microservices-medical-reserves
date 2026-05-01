@@ -62,17 +62,38 @@
 		</dependency>
 		<!-- JPA -->
 		<dependency>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-starter-data-jpa</artifactId>
-				<version>4.1.0-M4</version>
-				<scope>compile</scope>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+			<version>4.1.0-M4</version>
+			<scope>compile</scope>
 		</dependency>
 		<!-- Postgres SQL Driver -->
 		<dependency>
-				<groupId>org.postgresql</groupId>
-				<artifactId>postgresql</artifactId>
-				<version>42.7.10</version>
-				<scope>compile</scope>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>42.7.10</version>
+			<scope>compile</scope>
+		</dependency>
+		<!-- HATEOAS -->
+		<dependency>
+			<groupId>org.springframework.hateoas</groupId>
+			<artifactId>spring-hateoas</artifactId>
+			<version>3.1.0-RC1</version>
+			<scope>compile</scope>
+		</dependency>
+		<!-- JUnit 5 -->
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-api</artifactId>
+			<version>6.1.0-RC1</version>
+			<scope>test</scope>
+		</dependency>
+		<!-- MOCKITO -->
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>5.23.0</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 
