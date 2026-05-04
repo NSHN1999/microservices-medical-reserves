@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 
 import java.util.Arrays;
@@ -17,6 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.reserva.citas_medicas.dto.CreateMedicalReserveRequestDTO;
 import com.reserva.citas_medicas.dto.MedicalReserveResponseDTO;
 import com.reserva.citas_medicas.models.MedicalReserve;
 import com.reserva.citas_medicas.repositories.MedicalReserveRepository;
@@ -32,6 +34,7 @@ public class MedicalReservesServiceIMPLTest {
   private MedicalReserveServiceIMPL medicalReserveService;
 
   private MedicalReserve reserveEntity;
+  private CreateMedicalReserveRequestDTO reserveRequest;
 
   @BeforeEach
   void setUp(){
@@ -44,6 +47,14 @@ public class MedicalReservesServiceIMPLTest {
     reserveEntity.setIsReserved(true);
     reserveEntity.setDescription("Dolor en el ojo derecho.");
     reserveEntity.setTotalAmount(25000);
+
+    reserveRequest = new CreateMedicalReserveRequestDTO();
+    reserveRequest.setDate("2026-05-04");
+    reserveRequest.setHr("09:00");
+    reserveRequest.setNameDoctor("Bruce Banner");
+    reserveRequest.setNamePatient("Thanos");
+    reserveRequest.setDescription("Dolor de pecho");
+    reserveRequest.setTotalAmount(45000);
   };
 
   @Test
@@ -81,5 +92,33 @@ public class MedicalReservesServiceIMPLTest {
     assertEquals(date, resultado.get(0).getDate());
     assertEquals("Nicolás Hernández", resultado.get(0).getNamePatient());
     verify(medicalReserveRepository, times(1)).findAllAvailableByDate(date);
+  };
+
+  @Test
+  @DisplayName("Debería obtener un array vacio si no existen citas medicas")
+  void deberiaObtenerUnArrayVacioSiNoExistenCitasMedicas(){
+    String date = "2026-05-02";
+    when(medicalReserveRepository.findAllAvailableByDate(date)).thenReturn(Arrays.asList());
+    List<MedicalReserveResponseDTO> resultado = medicalReserveService.getAvailableReservations(date);
+
+    assertNotNull(resultado);
+    assertEquals(0, resultado.size());
+    verify(medicalReserveRepository, times(1)).findAllAvailableByDate(date);
+  };
+
+  @Test
+  @DisplayName("Debería crear una nueva reserva medica")
+  void deberiaCrearUnaNuevaReservaMedica(){
+    when(medicalReserveRepository.save(any(MedicalReserve.class))).thenReturn(reserveEntity);
+
+    MedicalReserveResponseDTO resultado = medicalReserveService.createReserve(reserveRequest);
+
+    assertNotNull(resultado);
+    assertEquals("2026-05-04", resultado.getDate());
+    assertEquals("09:00", resultado.getHr());
+    assertEquals("Bruce Banner", resultado.getNameDoctor());
+    assertEquals("Thanos", resultado.getNamePatient());
+    assertEquals("Dolor de pecho", resultado.getDescription());
+    assertEquals(45000, resultado.getTotalAmount());
   };
 };
